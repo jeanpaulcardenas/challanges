@@ -8,16 +8,12 @@ def read_input(file_path: str, filter_do_dont: bool):
         memory = d.read()
 
     if filter_do_dont:
-        filtered = re.split("(do\(\))|don't\(\)", memory)  # returns list: [ txt, seperator, txt, ... ]
-        print(filtered)
-        result = [filtered[0]] + \
-                 [value
-                  for idx, value
-                  in enumerate(filtered[2:len(filtered):2])
-                  if filtered[2 * idx + 1] == "do()"
-                  ]
-
-        memory = ''.join(result)
+        do_removed = re.split(r'do\(\)', memory)
+        aux_list = list()
+        for elem in do_removed:
+            aux_list.append(re.split("don't\(\)", elem)[0])
+        filtered_memory = "".join(aux_list)
+        return filtered_memory
 
     return memory
 
