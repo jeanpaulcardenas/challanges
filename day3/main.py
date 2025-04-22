@@ -1,38 +1,49 @@
 import re
 
 
-def read_input(file_path: str):
+def read_input(file_path: str, filter_do_dont: bool):
     """Reads doc in filepath. obtains target numbers following instructions of 'enunciado.txt'
-    returns a list of sets of ints """
+    returns a list of tupless of ints """
     with open(file_path, mode='r') as d:
-        first_data = d.read()
+        memory = d.read()
 
-    list_sets = re.findall(r'mul[(](\d{1,3}),(\d{1,3})[)]', first_data)
-    # r' -> define as raw string
-    # [] finds the actual symbol
-    # () returns value or values
-    # \d digit
-    # {1,3} from 1 to 3 characters -> so from 0 to 999
+    if filter_do_dont:
+        filtered = re.split("(do\(\))|don't\(\)", memory)  # returns list: [ txt, seperator, txt, ... ]
+        print(filtered)
+        result = [filtered[0]] + \
+                 [value
+                  for idx, value
+                  in enumerate(filtered[2:len(filtered):2])
+                  if filtered[2 * idx + 1] == "do()"
+                  ]
 
-    for idx, elem in enumerate(list_sets):
-        list_sets[idx] = {int(x) for x in elem}
+        memory = ''.join(result)
 
-    return list_sets
+    return memory
+
+
+def find_valid_mul(memory):
+    list_tuples = re.findall(r'mul\((\d{1,3}),(\d{1,3})\)', memory)
+
+    for idx, elem in enumerate(list_tuples):
+        list_tuples[idx] = [int(x) for x in elem]
+    return list_tuples
 
 
 # I'm not downloading numpy for a single simple function. Creating my own
-def multiplt_lofs(data: list[set]):
-    """multiply a list of sets of ints and add them. sets can have any args
+def multiply_loft(data: list[tuple]):
+    """multiply a list of tuples of ints and add them. tuples can have any args
     e.g: [(1, 2, 3), (3, 4, 5)] returns 1 * 2 * 3 + 3 * 4 * 5 = 66"""
     result = 0
-    for my_set in data:
+    for my_tuple in data:
         aux = 1
-        for num in my_set:
+        for num in my_tuple:
             aux *= num
         result += aux
     return result
 
 
-my_list_of_sets = read_input('./data.txt')
-print(my_list_of_sets)
-print(multiplt_lofs(my_list_of_sets))
+read_memory = read_input('./data.txt', True)
+my_tuples = find_valid_mul(read_memory)
+solution = multiply_loft(my_tuples)
+print(solution)
